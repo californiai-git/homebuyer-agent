@@ -28,6 +28,8 @@ export type SearchCriteria = {
   query: string;
   maxPrice: number;
   homeType: string;
+  /** Optional per-user comfortable monthly payment used to recompute the fit badge. */
+  comfortable?: number;
 };
 
 /** Filters a set of listings against user-entered criteria. Provider-agnostic. */

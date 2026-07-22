@@ -13,9 +13,11 @@ export async function GET(request: Request) {
   const homeType = searchParams.get("homeType") ?? ANY_HOME_TYPE;
   const rawMaxPrice = Number(searchParams.get("maxPrice"));
   const maxPrice = Number.isFinite(rawMaxPrice) && rawMaxPrice > 0 ? rawMaxPrice : 1_500_000;
+  const rawComfortable = Number(searchParams.get("comfortable"));
+  const comfortable = Number.isFinite(rawComfortable) && rawComfortable > 0 ? rawComfortable : undefined;
 
   try {
-    const listings = await fetchListings({ query, homeType, maxPrice });
+    const listings = await fetchListings({ query, homeType, maxPrice, comfortable });
     return NextResponse.json({ listings, provider: currentProviderLabel() });
   } catch (error) {
     console.error("Listings fetch failed", error);

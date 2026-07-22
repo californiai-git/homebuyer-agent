@@ -21,7 +21,7 @@ const cache = new Map<string, CacheEntry>();
 const CACHE_TTL_MS = 30_000;
 
 function cacheKey(criteria: SearchCriteria): string {
-  return `${criteria.homeType}|${criteria.maxPrice}|${criteria.query.toLowerCase().trim()}`;
+  return `${criteria.homeType}|${criteria.maxPrice}|${criteria.query.toLowerCase().trim()}|${criteria.comfortable ?? "-"}`;
 }
 
 function currentProvider(): "simplyrets" | "mock" {
@@ -38,6 +38,12 @@ export function currentProviderLabel(): string {
   }
 }
 
+/** Overwrites each listing's fit label using the caller's comfortable payment. */
+function reapplyFit(listings: Listing[], comfortable: number | undefined): Listing[] {
+  if (comfortable === undefined || comfortable <= 0) return listings;
+  return listings.map((listing) => ({ ...listing, fit: fitFor(listing.monthly, comfortable) }));
+}
+
 export async function fetchListings(criteria: SearchCriteria): Promise<Listing[]> {
   const provider = currentProvider();
   const key = `${provider}:${cacheKey(criteria)}`;
@@ -46,10 +52,11 @@ export async function fetchListings(criteria: SearchCriteria): Promise<Listing[]
     return cached.listings;
   }
 
-  const listings = provider === "simplyrets"
+  const raw = provider === "simplyrets"
     ? await fetchFromSimplyRets(criteria)
     : matchListings(MOCK_LISTINGS, criteria);
 
+  const listings = reapplyFit(raw, criteria.comfortable);
   cache.set(key, { at: Date.now(), listings });
   return listings;
 }

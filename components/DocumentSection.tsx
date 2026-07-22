@@ -3,13 +3,15 @@
 import { useRef, useState } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { useDriveDocuments } from "@/lib/useDriveDocuments";
+import { useAnalyses } from "@/lib/useAnalyses";
 import DocumentList from "./DocumentList";
 
 /**
  * One accordion row in the left nav: a title, a toggle, and (when open) the
  * document list + upload control for either the shared "common" folder or a
- * single house's folder. Replaces the old separate CommonDocuments /
- * HouseDocuments components with one implementation.
+ * single house's folder. For the "common" folder, per-document Analyze
+ * actions are also shown so pay stubs / bank statements can feed the
+ * affordability calculator.
  */
 export default function DocumentSection({
   title,
@@ -26,6 +28,8 @@ export default function DocumentSection({
   const { status } = useSession();
   const inputRef = useRef<HTMLInputElement>(null);
   const { documents, loading, uploading, error, upload, remove } = useDriveDocuments(scope, address, open);
+  const analyses = useAnalyses();
+  const isCommon = scope === "common";
 
   return (
     <div className="nav-section">
@@ -60,7 +64,16 @@ export default function DocumentSection({
                 }}
               />
               {error && <p className="doc-error">{error}</p>}
-              <DocumentList documents={documents} loading={loading} onDelete={remove} />
+              {analyses.error && <p className="doc-error">{analyses.error}</p>}
+              <DocumentList
+                documents={documents}
+                loading={loading}
+                onDelete={remove}
+                analysesByFileId={isCommon ? analyses.byDriveFileId : undefined}
+                pendingAnalysisId={isCommon ? analyses.pendingId : null}
+                onAnalyze={isCommon ? analyses.analyze : undefined}
+                onRemoveAnalysis={isCommon ? analyses.remove : undefined}
+              />
             </>
           )}
         </div>

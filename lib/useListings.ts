@@ -25,6 +25,7 @@ export function useListings(criteria: SearchCriteria) {
         maxPrice: String(criteria.maxPrice),
         homeType: criteria.homeType
       });
+      if (criteria.comfortable) params.set("comfortable", String(criteria.comfortable));
 
       setLoading(true);
       setError(null);
@@ -54,7 +55,7 @@ export function useListings(criteria: SearchCriteria) {
       window.clearTimeout(timer);
       abortRef.current?.abort();
     };
-  }, [criteria.query, criteria.maxPrice, criteria.homeType]);
+  }, [criteria.query, criteria.maxPrice, criteria.homeType, criteria.comfortable]);
 
   return { listings, provider, loading, error };
 }

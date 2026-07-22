@@ -2,9 +2,11 @@
 
 import { useMemo, useState } from "react";
 import AuthButton from "./AuthButton";
+import AffordabilityPanel from "./AffordabilityPanel";
 import SideNav from "./SideNav";
 import ThemeToggle from "./ThemeToggle";
 import { ANY_HOME_TYPE } from "@/lib/listings";
+import { useAffordability } from "@/lib/useAffordability";
 import { useListings } from "@/lib/useListings";
 
 const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
@@ -14,8 +16,13 @@ export default function HomeSearchDashboard() {
   const [maxPrice, setMaxPrice] = useState(700000);
   const [homeType, setHomeType] = useState(ANY_HOME_TYPE);
   const [saved, setSaved] = useState<number[]>([]);
+  const [planOpen, setPlanOpen] = useState(false);
 
-  const criteria = useMemo(() => ({ query, maxPrice, homeType }), [query, maxPrice, homeType]);
+  const { snapshot, update } = useAffordability();
+  const criteria = useMemo(
+    () => ({ query, maxPrice, homeType, comfortable: snapshot.comfortable }),
+    [query, maxPrice, homeType, snapshot.comfortable]
+  );
   const { listings, provider, loading, error } = useListings(criteria);
 
   function toggleSaved(id: number) {
@@ -27,6 +34,15 @@ export default function HomeSearchDashboard() {
     setMaxPrice(next.maxPrice);
     setHomeType(next.homeType);
   }
+
+  const hasCustomAffordability = snapshot.paystubCount > 0 || snapshot.manualOverride !== null;
+  const planSubtitle = snapshot.manualOverride !== null
+    ? "Manual override"
+    : snapshot.paystubCount === 0
+      ? "Default demo plan"
+      : snapshot.formula === "cash_flow"
+        ? "From your income and expenses"
+        : "28% of your gross income";
 
   return (
     <main>
@@ -47,9 +63,16 @@ export default function HomeSearchDashboard() {
         </div>
         <aside id="plan">
           <p>Your comfortable monthly payment</p>
-          <strong>$4,200</strong><span>/ month</span>
+          <strong>{money.format(snapshot.comfortable)}</strong><span>/ month</span>
           <div className="meter"><i /></div>
-          <small>Based on a demo buyer plan · <a href="#search">Adjust plan</a></small>
+          <small>{planSubtitle} · <button type="button" className="plan-toggle" onClick={() => setPlanOpen((v) => !v)}>{planOpen ? "Hide" : hasCustomAffordability ? "Adjust plan" : "Set up plan"}</button></small>
+          {planOpen && (
+            <AffordabilityPanel
+              snapshot={snapshot}
+              onFormulaChange={(formula) => update({ formula })}
+              onOverrideChange={(manualOverride) => update({ manualOverride })}
+            />
+          )}
         </aside>
       </section>
 

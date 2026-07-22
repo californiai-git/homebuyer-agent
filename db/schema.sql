@@ -23,3 +23,29 @@ create table if not exists saved_search_seen_listings (
   seen_at timestamptz not null default now(),
   primary key (saved_search_id, listing_id)
 );
+
+-- Extracted numbers from a document the user chose to have analyzed (pay
+-- stubs, bank statements). One row per (owner, Drive file); re-analyzing
+-- the same file updates the row in place.
+create table if not exists document_analyses (
+  id uuid primary key default gen_random_uuid(),
+  owner_sub text not null,
+  drive_file_id text not null,
+  file_name text not null,
+  kind text not null,
+  extracted_json jsonb not null,
+  model text not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (owner_sub, drive_file_id)
+);
+
+create index if not exists document_analyses_owner_idx on document_analyses (owner_sub);
+
+-- Per-user affordability preference. One row per user; upserted on change.
+create table if not exists financial_profiles (
+  owner_sub text primary key,
+  affordability_formula text not null default 'cash_flow',
+  manual_override integer,
+  updated_at timestamptz not null default now()
+);
