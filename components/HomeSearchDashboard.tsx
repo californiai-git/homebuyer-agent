@@ -4,26 +4,28 @@ import { useMemo, useState } from "react";
 import AuthButton from "./AuthButton";
 import SideNav from "./SideNav";
 import ThemeToggle from "./ThemeToggle";
-import { ANY_HOME_TYPE, matchListings } from "@/lib/listings";
+import { ANY_HOME_TYPE } from "@/lib/listings";
+import { useListings } from "@/lib/useListings";
 
 const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 
 export default function HomeSearchDashboard() {
   const [query, setQuery] = useState("");
-  const [maxPrice, setMaxPrice] = useState(750000);
+  const [maxPrice, setMaxPrice] = useState(700000);
   const [homeType, setHomeType] = useState(ANY_HOME_TYPE);
   const [saved, setSaved] = useState<number[]>([]);
 
-  const matches = useMemo(() => matchListings({ query, maxPrice, homeType }), [maxPrice, homeType, query]);
+  const criteria = useMemo(() => ({ query, maxPrice, homeType }), [query, maxPrice, homeType]);
+  const { listings, provider, loading, error } = useListings(criteria);
 
   function toggleSaved(id: number) {
     setSaved((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
   }
 
-  function applySearch(criteria: { query: string; maxPrice: number; homeType: string }) {
-    setQuery(criteria.query);
-    setMaxPrice(criteria.maxPrice);
-    setHomeType(criteria.homeType);
+  function applySearch(next: { query: string; maxPrice: number; homeType: string }) {
+    setQuery(next.query);
+    setMaxPrice(next.maxPrice);
+    setHomeType(next.homeType);
   }
 
   return (
@@ -63,26 +65,50 @@ export default function HomeSearchDashboard() {
           </section>
 
           <section className="results" id="results">
-            <div className="section-heading"><div><p className="eyebrow">Curated for your plan</p><h2>Homes worth a closer look</h2></div><p>{matches.length} demo {matches.length === 1 ? "home" : "homes"}</p></div>
+            <div className="section-heading">
+              <div>
+                <p className="eyebrow">Curated for your plan</p>
+                <h2>Homes worth a closer look</h2>
+              </div>
+              <p>
+                {loading ? "Loading…" : `${listings.length} ${listings.length === 1 ? "home" : "homes"}`}
+                {provider ? ` · ${provider}` : ""}
+              </p>
+            </div>
+
+            {error && <div className="doc-error">{error}</div>}
+
             <div className="cards" id="saved">
-              {matches.map((listing) => (
+              {listings.map((listing) => (
                 <article className="card" key={listing.id}>
-                  <div className={`house-art ${listing.color}`}><span>{listing.city}</span><button onClick={() => toggleSaved(listing.id)} aria-label={`${saved.includes(listing.id) ? "Remove" : "Save"} ${listing.address}`}>{saved.includes(listing.id) ? "♥" : "♡"}</button><div className="house"><i /><b /><small /></div></div>
+                  <div className={`house-art ${listing.color}`} style={listing.photo ? { backgroundImage: `url(${listing.photo})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}>
+                    <span>{listing.city || listing.type}</span>
+                    <button onClick={() => toggleSaved(listing.id)} aria-label={`${saved.includes(listing.id) ? "Remove" : "Save"} ${listing.address}`}>{saved.includes(listing.id) ? "♥" : "♡"}</button>
+                    {!listing.photo && <div className="house"><i /><b /><small /></div>}
+                  </div>
                   <div className="card-body">
                     <div className="price"><strong>{money.format(listing.price)}</strong><span className={listing.fit.toLowerCase().replace(" ", "-")}>{listing.fit}</span></div>
-                    <h3>{listing.address}</h3><p>{listing.city}, CA · {listing.beds} beds · {listing.baths} baths · {listing.sqft.toLocaleString()} sq ft</p>
+                    <h3>{listing.address}</h3>
+                    <p>{listing.city ? `${listing.city} · ` : ""}{listing.beds} beds · {listing.baths} baths{listing.sqft ? ` · ${listing.sqft.toLocaleString()} sq ft` : ""}</p>
                     <hr />
                     <div className="monthly"><span>Estimated monthly total<small>Mortgage, tax, insurance & fees</small></span><strong>{money.format(listing.monthly)}<small>/mo</small></strong></div>
                   </div>
                 </article>
               ))}
             </div>
-            {matches.length === 0 && <div className="empty"><h3>No demo homes match yet</h3><p>Try a higher maximum price or search Sacramento, Roseville, Elk Grove, or Folsom.</p></div>}
+
+            {!loading && listings.length === 0 && !error && (
+              <div className="empty">
+                <h3>No homes match yet</h3>
+                <p>Try a higher maximum price, a different home type, or a different city or address.</p>
+              </div>
+            )}
           </section>
         </div>
       </div>
 
-      <footer><strong>HomeBuy Agent</strong><p>Demo estimates for research and planning—not a lending commitment or brokerage service.</p><span>Testing preview · Mock listings only</span></footer>
+      <footer><strong>HomeBuy Agent</strong><p>Demo estimates for research and planning—not a lending commitment or brokerage service.</p><span>{provider || "Testing preview"}</span></footer>
     </main>
   );
 }
+

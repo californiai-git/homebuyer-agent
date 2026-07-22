@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { matchListings } from "@/lib/listings";
+import { fetchListings } from "@/lib/listingProviders";
 import { sendNewMatchesEmail } from "@/lib/email";
 import { dbErrorResponse } from "@/lib/db";
 import { getSeenListingIds, listAllSavedSearches, markListingsSeen } from "@/lib/savedSearches";
@@ -22,7 +22,7 @@ export async function GET(request: Request) {
     let emailsSent = 0;
 
     for (const search of searches) {
-      const matches = matchListings({ query: search.query, maxPrice: search.maxPrice, homeType: search.homeType });
+      const matches = await fetchListings({ query: search.query, maxPrice: search.maxPrice, homeType: search.homeType });
       const seen = await getSeenListingIds(search.id);
       const newMatches = matches.filter((listing) => !seen.has(listing.id));
 

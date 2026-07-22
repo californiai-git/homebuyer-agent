@@ -47,7 +47,7 @@ h1 em { color:var(--orange); }
 .card:hover { transform:translateY(-4px); box-shadow:0 16px 35px rgba(34,55,49,.11); }
 .house-art { height:205px; position:relative; overflow:hidden; background:#ead2c4; }
 .house-art.blue { background:#cbdde3; }.house-art.green { background:#d5dfc8; }.house-art.gold { background:#eadcb4; }
-.house-art>span { position:absolute; left:16px; top:16px; padding:6px 10px; border-radius:20px; background:rgba(255,255,255,.86); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
+.house-art>span { position:absolute; left:16px; top:16px; padding:6px 10px; border-radius:20px; background:rgba(255,255,255,.92); color:#17312b; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
 .house-art>button { position:absolute; right:15px; top:14px; z-index:2; width:37px; height:37px; border:0; border-radius:50%; background:rgba(255,255,255,.9); color:var(--orange); font-size:23px; cursor:pointer; }
 .house { position:absolute; width:54%; height:55%; left:23%; bottom:0; background:#f4eee4; box-shadow:0 5px 15px rgba(35,50,43,.15); }
 .house:before { content:''; position:absolute; left:-12%; top:-43%; width:124%; height:70%; background:#6d5a4b; clip-path:polygon(50% 0,100% 70%,92% 70%,92% 100%,8% 100%,8% 70%,0 70%); }
