@@ -40,7 +40,6 @@ export default function SavedSearchPanel({
   return (
     <div className="saved-searches">
       <div className="saved-searches-header">
-        <span>Saved searches</span>
         <button type="button" className="search-button" onClick={handleSave} disabled={saving}>
           {saving ? "Saving\u2026" : "Save this search"}
         </button>
