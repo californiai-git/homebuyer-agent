@@ -4,38 +4,18 @@ import { useMemo, useState } from "react";
 import AuthButton from "./AuthButton";
 import CommonDocuments from "./CommonDocuments";
 import HouseDocuments from "./HouseDocuments";
-
-type Listing = {
-  id: number;
-  city: string;
-  address: string;
-  price: number;
-  beds: number;
-  baths: number;
-  sqft: number;
-  monthly: number;
-  fit: "Comfortable" | "Stretch" | "Over capacity";
-  color: string;
-};
-
-const listings: Listing[] = [
-  { id: 1, city: "Sacramento", address: "1842 Maple Grove Lane", price: 589000, beds: 3, baths: 2, sqft: 1720, monthly: 3880, fit: "Comfortable", color: "coral" },
-  { id: 2, city: "Roseville", address: "940 Juniper Ridge Drive", price: 685000, beds: 4, baths: 3, sqft: 2240, monthly: 4470, fit: "Stretch", color: "blue" },
-  { id: 3, city: "Elk Grove", address: "2717 Willow Bend Court", price: 615000, beds: 3, baths: 2.5, sqft: 1950, monthly: 4090, fit: "Comfortable", color: "green" },
-  { id: 4, city: "Folsom", address: "1087 Granite Creek Way", price: 749000, beds: 4, baths: 3, sqft: 2460, monthly: 4860, fit: "Over capacity", color: "gold" }
-];
+import SavedSearchPanel from "./SavedSearchPanel";
+import { ANY_HOME_TYPE, matchListings } from "@/lib/listings";
 
 const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 
 export default function HomeSearchDashboard() {
   const [query, setQuery] = useState("");
   const [maxPrice, setMaxPrice] = useState(750000);
+  const [homeType, setHomeType] = useState(ANY_HOME_TYPE);
   const [saved, setSaved] = useState<number[]>([]);
 
-  const matches = useMemo(() => listings.filter((listing) => {
-    const search = query.toLowerCase().trim();
-    return listing.price <= maxPrice && (!search || `${listing.address} ${listing.city}`.toLowerCase().includes(search));
-  }), [maxPrice, query]);
+  const matches = useMemo(() => matchListings({ query, maxPrice, homeType }), [maxPrice, homeType, query]);
 
   function toggleSaved(id: number) {
     setSaved((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
@@ -67,9 +47,22 @@ export default function HomeSearchDashboard() {
 
       <section className="search-panel" id="search">
         <label className="location"><span>Where</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="City or address" /></label>
-        <label><span>Maximum price</span><select value={maxPrice} onChange={(event) => setMaxPrice(Number(event.target.value))}><option value="600000">$600,000</option><option value="700000">$700,000</option><option value="750000">$750,000</option></select></label>
-        <label><span>Home type</span><select><option>Any home</option><option>House</option><option>Condo</option></select></label>
+        <label><span>Maximum price</span><select value={maxPrice} onChange={(event) => setMaxPrice(Number(event.target.value))}><option value="400000">$400,000</option><option value="500000">$500,000</option><option value="600000">$600,000</option><option value="700000">$700,000</option><option value="800000">$800,000</option><option value="900000">$900,000</option><option value="1000000">$1,000,000</option><option value="1250000">$1,250,000</option><option value="1500000">$1,500,000+</option></select></label>
+        <label><span>Home type</span><select value={homeType} onChange={(event) => setHomeType(event.target.value)}><option>Any home</option><option>House</option><option>Condo</option></select></label>
         <button className="search-button" onClick={() => document.getElementById("results")?.scrollIntoView({ behavior: "smooth" })}>Search homes</button>
+      </section>
+
+      <section className="saved-searches-section">
+        <SavedSearchPanel
+          query={query}
+          maxPrice={maxPrice}
+          homeType={homeType}
+          onApply={(criteria) => {
+            setQuery(criteria.query);
+            setMaxPrice(criteria.maxPrice);
+            setHomeType(criteria.homeType);
+          }}
+        />
       </section>
 
       <section className="results" id="results">

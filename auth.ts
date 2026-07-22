@@ -101,6 +101,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async session({ session, token }) {
       return {
         ...session,
+        user: {
+          ...session.user,
+          id: typeof token.sub === "string" ? token.sub : ""
+        },
         accessToken: typeof token.accessToken === "string" ? token.accessToken : undefined,
         error: typeof token.error === "string" ? token.error : undefined
       };
