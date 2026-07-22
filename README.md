@@ -9,7 +9,7 @@ A public, open-source web app that combines authorized real-estate listing tools
 - Demonstration listings for local development.
 - Mortgage, property tax, insurance, PMI, HOA, cash-to-close, reserve, and DTI calculations.
 - Ranking into `comfortable`, `stretch`, and `over_capacity`.
-- PDF pre-approval extraction through the OpenAI Responses API.
+- PDF pre-approval, pay stub, and bank-statement extraction (Gemini by default, OpenAI supported).
 - Sign in with Google, and store sensitive documents in the user's own Google Drive.
 - Responsive Next.js UI, tests, and GitHub Actions CI.
 
@@ -27,7 +27,7 @@ npm run dev
 
 Open `http://localhost:3000`.
 
-The app uses demonstration listings until both `OPENAI_API_KEY` and `MCP_LISTINGS_SERVER_URL` are configured and `USE_MOCK_LISTINGS` is not `true`.
+The app uses demonstration listings until `MCP_LISTINGS_SERVER_URL` or `LISTINGS_PROVIDER=simplyrets` is configured. Document analysis needs a Gemini or OpenAI API key (Gemini's free tier is the recommended default).
 
 ## MCP integration
 

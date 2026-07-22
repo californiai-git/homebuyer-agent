@@ -1,7 +1,7 @@
 import { COMFORTABLE_MONTHLY_PAYMENT } from "./affordability";
 import type { DocumentAnalysis } from "./documentAnalyses";
 import type { AffordabilityFormula, FinancialProfile } from "./financialProfile";
-import type { BankStatementExtraction, PaystubExtraction } from "./openaiExtractor";
+import type { BankStatementExtraction, PaystubExtraction } from "./aiExtractor";
 
 /**
  * Aggregates a user's uploaded pay stubs and bank statements into a single

@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { dbErrorResponse } from "@/lib/db";
 import { driveErrorResponse, requireDriveAccessToken } from "@/lib/driveRouteHelpers";
 import { deleteAnalysis, listAnalyses, upsertAnalysis } from "@/lib/documentAnalyses";
-import { OpenAiNotConfiguredError, extract, type AnalysisKind } from "@/lib/openaiExtractor";
+import { AiNotConfiguredError, extract, type AnalysisKind } from "@/lib/aiExtractor";
 
 async function requireUser() {
   const session = await auth();
@@ -70,7 +70,7 @@ export async function POST(request: Request) {
     });
     return NextResponse.json({ analysis }, { status: 201 });
   } catch (error) {
-    if (error instanceof OpenAiNotConfiguredError) {
+    if (error instanceof AiNotConfiguredError) {
       return NextResponse.json({ error: error.message }, { status: 503 });
     }
     if (error instanceof Error && error.message.startsWith("PDF is too large")) {

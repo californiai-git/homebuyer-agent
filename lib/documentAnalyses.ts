@@ -1,5 +1,5 @@
 import { requireSql } from "./db";
-import type { AnalysisKind, BankStatementExtraction, PaystubExtraction } from "./openaiExtractor";
+import type { AnalysisKind, BankStatementExtraction, PaystubExtraction } from "./aiExtractor";
 
 export type DocumentAnalysis = {
   id: string;
