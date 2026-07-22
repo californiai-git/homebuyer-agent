@@ -35,6 +35,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Remove server-only routes for the static preview
+        # GitHub Pages only serves static files, so Google sign-in and the
+        # Drive-backed document API (which need a real Node.js server, and
+        # aren't available on this preview anyway) would otherwise make
+        # `next build --output export` fail. This only affects this
+        # ephemeral CI checkout, not the repository or the Vercel build.
+        run: rm -rf app/api
+
       - name: Build static preview
         run: pnpm build
 

@@ -1,6 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import AuthButton from "./AuthButton";
+import CommonDocuments from "./CommonDocuments";
+import HouseDocuments from "./HouseDocuments";
 
 type Listing = {
   id: number;
@@ -42,8 +45,8 @@ export default function HomeSearchDashboard() {
     <main>
       <header className="nav">
         <a className="brand" href="#top" aria-label="HomeBuy Agent home"><span>H</span> HomeBuy Agent</a>
-        <nav aria-label="Main navigation"><a href="#search">Search</a><a href="#plan">My plan</a><a href="#saved">Saved <b>{saved.length}</b></a></nav>
-        <button className="avatar" aria-label="Demo account">DA</button>
+        <nav aria-label="Main navigation"><a href="#search">Search</a><a href="#plan">My plan</a><a href="#saved">Saved <b>{saved.length}</b></a><a href="#documents">Documents</a></nav>
+        <AuthButton />
       </header>
 
       <section className="hero" id="top">
@@ -59,6 +62,8 @@ export default function HomeSearchDashboard() {
           <small>Based on a demo buyer plan · <a href="#search">Adjust plan</a></small>
         </aside>
       </section>
+
+      <CommonDocuments />
 
       <section className="search-panel" id="search">
         <label className="location"><span>Where</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="City or address" /></label>
@@ -78,6 +83,7 @@ export default function HomeSearchDashboard() {
                 <h3>{listing.address}</h3><p>{listing.city}, CA · {listing.beds} beds · {listing.baths} baths · {listing.sqft.toLocaleString()} sq ft</p>
                 <hr />
                 <div className="monthly"><span>Estimated monthly total<small>Mortgage, tax, insurance & fees</small></span><strong>{money.format(listing.monthly)}<small>/mo</small></strong></div>
+                <HouseDocuments address={`${listing.address}, ${listing.city}, CA`} />
               </div>
             </article>
           ))}

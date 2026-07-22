@@ -80,6 +80,30 @@ users/{userId}/houses/{houseId}/{documentId}/original.pdf
 users/{userId}/houses/{houseId}/{analysisId}/result.json
 ```
 
+## Implemented: Google Drive per-user object storage
+
+As a first `ObjectStorageProvider`, sensitive documents are stored directly in each user's own Google
+Drive instead of a shared bucket:
+
+```text
+homebuyer-agent/
+  common/                 <- USER_COMMON documents
+  <house address>/        <- HOUSE_SPECIFIC documents for that house
+```
+
+Key decisions:
+
+- The OAuth scope is `https://www.googleapis.com/auth/drive.file`, not the broader `drive` scope. This
+  restricts the app to files/folders it creates itself and avoids Google's costly "restricted scope"
+  security assessment required for the broader scope.
+- Tenant isolation for documents is delegated to Google's own per-user OAuth access control instead of a
+  database RLS policy: a user's access token can only ever see folders inside their own Drive, so there is
+  no shared table or bucket key prefix to get wrong.
+- Folder lookups always happen server-side by `(scope, address)`; API routes never trust a client-supplied
+  Drive folder ID, which rules out a class of cross-folder/IDOR-style mistakes.
+- Viewing and downloading a document is delegated to Google Drive's own `webViewLink`, so file bytes only
+  ever pass through this app's server during upload.
+
 ## Authentication strategy
 
 Use an authentication adapter instead of coupling business logic to one provider.
@@ -89,6 +113,9 @@ Use an authentication adapter instead of coupling business logic to one provider
 - Auth.js with Google, GitHub, and Facebook OAuth providers.
 - Provider accounts are linked to one internal `user.id`.
 - Optional email verification and passkeys can be added later.
+- **Current implementation**: only the Google provider is enabled, because per-user Google Drive document
+  storage (above) is tied to a Google session and its OAuth access token. GitHub and Facebook remain
+  documented options for a future non-Drive storage adapter.
 
 ### Self-hosted mode
 
