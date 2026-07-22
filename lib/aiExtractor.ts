@@ -10,7 +10,7 @@ import { GoogleGenAI, Type } from "@google/genai";
  */
 
 const OPENAI_DEFAULT_MODEL = "gpt-4o-mini";
-const GEMINI_DEFAULT_MODEL = "gemini-2.5-flash";
+const GEMINI_DEFAULT_MODEL = "gemini-flash-latest";
 
 // Whole-PDF cap sent to the model as inline base64. Keeps token cost and
 // upload time bounded even if a user drops in a 20-page statement.
